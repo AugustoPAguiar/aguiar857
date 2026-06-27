@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aguiar857 — Attacking Web Applications with Ffuf</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="main.js"></script>>
+</head>
+<body>
+
+  <!-- Boot screen -->
+  <div id="boot-screen">
+    <div id="boot-lines"></div>
+  </div>
+
+  <div class="vignette"></div>
+
+  <div class="crt-wrap">
+    <div class="crt-screen">
+
+      <!-- TOP BAR -->
+      <div class="top-bar">
+        <div class="top-bar-logo">&#9632; Aguiar857 1.0V &#9632;</div>
+        <div class="top-bar-status">[ CYBER SECURITY TERMINAL ]<span class="blink">_</span></div>
+      </div>
+
+      <!-- NAV -->
+      <nav class="nav-bar">
+        <a href="#">[HOME]</a>
+        <a href="#">[CATEGORIAS]</a>
+        <a href="#">[TAGS]</a>
+        <a href="#">[ARQUIVOS]</a>
+        <a href="#">[SOBRE]</a>
+      </nav>
+
+      <!-- HERO -->
+      <div class="hero-section">
+        <div class="breadcrumb">
+          <a href="#">HOME</a> &gt; <a href="#">POSTS</a> &gt; <span>ATTACKING WEB APPLICATIONS WITH FFUF</span>
+        </div>
+
+        <h1 class="post-title">ATTACKING WEB APPLICATIONS<br>WITH FFUF</h1>
+        <div class="post-subtitle">HTB ACADEMY WALKTHROUGH</div>
+
+        <div class="post-meta">
+          <div>POSTADO: <span>24 FEV 2026</span></div>
+          <div>LEITURA: <span>13 MIN</span></div>
+          <div>CATEGORIA: <span>PENTESTING</span></div>
+          <div>DIFICULDADE: <span>MÉDIO</span></div>
+        </div>
+
+        <div class="avatar-row">
+          <div class="avatar-box">AG</div>
+          <div>
+            <div class="author-name">AGUIAR857</div>
+            <div class="author-role">CYBER SECURITY ENTHUSIAST</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MAIN -->
+      <div class="main-layout">
+
+        <!-- POST BODY -->
+        <div class="post-body">
+
+          <div class="hero-img">
+            <div class="hero-img-ascii"> ██╗  ██╗████████╗██████╗      █████╗  ██████╗ █████╗ ██████╗
+ ██║  ██║╚══██╔══╝██╔══██╗    ██╔══██╗██╔════╝██╔══██╗██╔══██╗
+ ███████║   ██║   ██████╔╝    ███████║██║     ███████║██║  ██║
+ ██╔══██║   ██║   ██╔══██╗    ██╔══██║██║     ██╔══██║██║  ██║
+ ██║  ██║   ██║   ██████╔╝    ██║  ██║╚██████╗██║  ██║██████╔╝
+ ╚═╝  ╚═╝   ╚═╝   ╚═════╝     ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝╚═════╝</div>
+            <div class="hero-img-caption">[ MÓDULO CONCLUÍDO — ACHIEVEMENT UNLOCKED ]</div>
+          </div>
+
+          <!-- OVERVIEW -->
+          <h2 class="post-heading" id="overview">// OVERVIEW</h2>
+
+          <p class="post-p">
+            O módulo <em>Attacking Web Applications with Ffuf</em> no HTB Academy apresenta uma das ferramentas mais eficazes no arsenal de reconhecimento de um pentester. <em>ffuf</em> — Fuzz Faster U Fool — é um web fuzzer rápido e flexível feito para descobrir conteúdo oculto e enumerar superfícies de ataque em aplicações HTTP.
+          </p>
+
+          <p class="post-p">O módulo abrange:</p>
+
+          <div class="callout">
+            <div class="callout-icon">&gt;</div>
+            <div class="callout-text">
+              <strong>[01]</strong> Fuzzing de diretórios e páginas com wordlists<br>
+              <strong>[02]</strong> Scan recursivo com filtragem de extensões<br>
+              <strong>[03]</strong> Enumeração de subdomínios contra alvos reais<br>
+              <strong>[04]</strong> VHost fuzzing em domínios roteados internamente<br>
+              <strong>[05]</strong> Descoberta de parâmetros GET e POST<br>
+              <strong>[06]</strong> Value fuzzing para extrair flags via <em>curl</em>
+            </div>
+          </div>
+
+          <p class="post-p">
+            Este é um walkthrough completo de como trabalhei pelo módulo — os comandos, o raciocínio e as lições que carrego para engagements reais.
+          </p>
+
+          <div class="callout info">
+            <div class="callout-icon">i</div>
+            <div class="callout-text">
+              <strong>MÓDULO CONCLUÍDO:</strong> <a href="https://academy.hackthebox.com/achievement/2164494/54/" style="color:#00ccff;">academy.hackthebox.com/achievement/2164494/54/</a>
+            </div>
+          </div>
+
+          <div class="pixel-divider">&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;</div>
+
+          <!-- PART 1 -->
+          <h2 class="post-heading" id="part1">// PARTE 1 — DIRECTORY &amp; PAGE FUZZING</h2>
+
+          <h3 class="post-subheading" id="hidden-dirs">::: FINDING HIDDEN DIRECTORIES</h3>
+
+          <div class="callout warning">
+            <div class="callout-icon">?</div>
+            <div class="callout-text">
+              <strong>QUESTÃO:</strong> Além do diretório encontrado acima, há outro que pode ser descoberto. Qual é?<br>
+              <strong>RESPOSTA:</strong> <code>forum</code>
+            </div>
+          </div>
+
+          <p class="post-p">
+            A primeira tarefa foi brute-force de diretórios usando o <em>ffuf</em> com a wordlist <em>directory-list-2.3-small.txt</em> contra o alvo. O flag <em>-w</em> especifica a wordlist e <em>-u</em> define a URL alvo, com <em>FUZZ</em> como ponto de injeção:
+          </p>
+
+          <div class="code-block">
+            <div class="code-block-header">TERMINAL — BASH</div>
+            <code><span class="prompt">$ </span><span class="cmd">ffuf</span> <span class="flag">-w</span> <span class="val">/opt/useful/SecLists/Discovery/Web-Content/directory-list-2.3-small.txt:FUZZ</span> \
+     <span class="flag">-u</span> <span class="val">http://SERVER_IP:PORT/FUZZ</span>
+
+<span class="comment">        /'___\  /'___\           /'___\
+       /\ \__/ /\ \__/  __  __  /\ \__/
+       \ \ ,__\\ \ ,__\/\ \/\ \ \ \ ,__\
+        \ \ \_/ \ \ \_/\ \ \_\ \ \ \ \_/
+         \ \_\   \ \_\  \ \____/  \ \_\
+          \/_/    \/_/   \/___/    \/_/
+
+       v1.4.1</span>
+
+<span class="comment">________________________________________________</span>
+
+ <span class="flag">:: Method</span>           <span class="val">: GET</span>
+ <span class="flag">:: URL</span>              <span class="val">: http://SERVER_IP:PORT/FUZZ</span>
+ <span class="flag">:: Wordlist</span>         <span class="val">: FUZZ: directory-list-2.3-small.txt</span>
+ <span class="flag">:: Follow redirects</span> <span class="val">: false</span>
+ <span class="flag">:: Calibration</span>      <span class="val">: false</span>
+ <span class="flag">:: Timeout</span>          <span class="val">: 10</span>
+ <span class="flag">:: Threads</span>          <span class="val">: 40</span>
+ <span class="flag">:: Matcher</span>          <span class="val">: Response status: 200,204,301,302,307,401,403</span>
+<span class="comment">________________________________________________</span>
+
+<span class="string">blog</span>                    <span class="comment">[Status: 301, Size: 326, Words: 20, Lines: 10]</span>
+<span class="string">forum</span>                   <span class="comment">[Status: 301, Size: 327, Words: 20, Lines: 10]</span>
+<span class="comment">:: Progress: [87651/87651] :: Job [1/1] :: 786 req/sec :: Duration: [0:01:51] :: Errors: 0 ::</span></code>
+          </div>
+
+          <h3 class="post-subheading" id="ext-fuzzing">::: EXTENSION FUZZING</h3>
+
+          <p class="post-p">
+            Nem todos os ficheiros têm extensão visível. Com o ffuf é possível testar múltiplas extensões (<em>.php</em>, <em>.html</em>, <em>.aspx</em>) usando duas wordlists ao mesmo tempo, com dois keywords distintos:
+          </p>
+
+          <div class="code-block">
+            <div class="code-block-header">TERMINAL — BASH</div>
+            <code><span class="prompt">$ </span><span class="cmd">ffuf</span> <span class="flag">-w</span> <span class="val">/opt/useful/SecLists/Discovery/Web-Content/web-extensions.txt:FUZZ</span> \
+     <span class="flag">-u</span> <span class="val">http://SERVER_IP:PORT/blog/indexFUZZ</span>
+
+<span class="string">.php</span>                    <span class="comment">[Status: 200, Size: 0, Words: 1, Lines: 1]</span>
+<span class="string">.phps</span>                   <span class="comment">[Status: 403, Size: 283, Words: 20, Lines: 10]</span></code>
+          </div>
+
+          <div class="pixel-divider">&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;</div>
+
+          <!-- PART 2 -->
+          <h2 class="post-heading" id="part2">// PARTE 2 — SUBDOMAIN ENUMERATION</h2>
+
+          <h3 class="post-subheading">::: SUBDOMAIN FUZZING</h3>
+
+          <p class="post-p">
+            A enumeração de subdomínios testa prefixos contra o domínio alvo. Com o ffuf basta substituir o subdomínio pelo keyword <em>FUZZ</em> na URL:
+          </p>
+
+          <div class="code-block">
+            <div class="code-block-header">TERMINAL — BASH</div>
+            <code><span class="prompt">$ </span><span class="cmd">ffuf</span> <span class="flag">-w</span> <span class="val">/opt/useful/SecLists/Discovery/DNS/subdomains-top1million-5000.txt:FUZZ</span> \
+     <span class="flag">-u</span> <span class="val">https://FUZZ.hackthebox.eu/</span>
+
+<span class="string">www</span>                     <span class="comment">[Status: 200, Size: 22266, Words: 2123, Lines: 251]</span>
+<span class="string">forum</span>                   <span class="comment">[Status: 200, Size: 75324, Words: 5765, Lines: 489]</span>
+<span class="string">academy</span>                 <span class="comment">[Status: 302, Size: 0, Words: 1, Lines: 1]</span></code>
+          </div>
+
+          <h3 class="post-subheading" id="vhost">::: VHOST FUZZING</h3>
+
+          <p class="post-p">
+            VHost fuzzing difere de subdomain fuzzing porque testa cabeçalhos HTTP <em>Host</em> diretamente contra o IP alvo, permitindo descobrir domínios internos não registados publicamente no DNS:
+          </p>
+
+          <div class="code-block">
+            <div class="code-block-header">TERMINAL — BASH</div>
+            <code><span class="prompt">$ </span><span class="cmd">ffuf</span> <span class="flag">-w</span> <span class="val">/opt/useful/SecLists/Discovery/DNS/subdomains-top1million-5000.txt:FUZZ</span> \
+     <span class="flag">-u</span> <span class="val">http://academy.htb:PORT/</span> \
+     <span class="flag">-H</span> <span class="string">'Host: FUZZ.academy.htb'</span> \
+     <span class="flag">-fs</span> <span class="val">900</span>
+
+<span class="string">admin</span>                   <span class="comment">[Status: 200, Size: 2510, Words: 465, Lines: 72]</span>
+<span class="string">test</span>                    <span class="comment">[Status: 200, Size: 2501, Words: 462, Lines: 72]</span></code>
+          </div>
+
+          <div class="callout">
+            <div class="callout-icon">!</div>
+            <div class="callout-text">
+              <strong>DICA:</strong> O flag <em>-fs</em> filtra por tamanho de resposta (size). É essencial para remover falsos positivos — respostas que retornam 200 mas têm sempre o mesmo tamanho são páginas de erro genéricas, não resultados reais.
+            </div>
+          </div>
+
+          <div class="pixel-divider">&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;</div>
+
+          <!-- PART 3 -->
+          <h2 class="post-heading" id="part3">// PARTE 3 — PARAMETER DISCOVERY</h2>
+
+          <h3 class="post-subheading">::: GET PARAMETERS</h3>
+
+          <p class="post-p">
+            Descoberta de parâmetros GET ocultos pode revelar funcionalidades não documentadas. O ffuf injeta o <em>FUZZ</em> no lugar do nome do parâmetro na query string:
+          </p>
+
+          <div class="code-block">
+            <div class="code-block-header">TERMINAL — BASH</div>
+            <code><span class="prompt">$ </span><span class="cmd">ffuf</span> <span class="flag">-w</span> <span class="val">/opt/useful/SecLists/Discovery/Web-Content/burp-parameter-names.txt:FUZZ</span> \
+     <span class="flag">-u</span> <span class="val">http://admin.academy.htb:PORT/admin/admin.php?FUZZ=key</span> \
+     <span class="flag">-fs</span> <span class="val">798</span>
+
+<span class="string">user</span>                    <span class="comment">[Status: 200, Size: 800, Words: 65, Lines: 35]</span></code>
+          </div>
+
+          <h3 class="post-subheading">::: POST PARAMETERS</h3>
+
+          <p class="post-p">
+            Para parâmetros POST, o ffuf usa o flag <em>-d</em> para definir o body e <em>-X POST</em> para o método. A wordlist continua a injetar no keyword <em>FUZZ</em>:
+          </p>
+
+          <div class="code-block">
+            <div class="code-block-header">TERMINAL — BASH</div>
+            <code><span class="prompt">$ </span><span class="cmd">ffuf</span> <span class="flag">-w</span> <span class="val">/opt/useful/SecLists/Discovery/Web-Content/burp-parameter-names.txt:FUZZ</span> \
+     <span class="flag">-u</span> <span class="val">http://admin.academy.htb:PORT/admin/admin.php</span> \
+     <span class="flag">-X</span> <span class="val">POST</span> \
+     <span class="flag">-d</span> <span class="string">'FUZZ=key'</span> \
+     <span class="flag">-H</span> <span class="string">'Content-Type: application/x-www-form-urlencoded'</span> \
+     <span class="flag">-fs</span> <span class="val">798</span>
+
+<span class="string">id</span>                      <span class="comment">[Status: 200, Size: 803, Words: 68, Lines: 35]</span></code>
+          </div>
+
+          <div class="pixel-divider">&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;</div>
+
+          <!-- PART 4 -->
+          <h2 class="post-heading" id="part4">// PARTE 4 — VALUE FUZZING</h2>
+
+          <p class="post-p">
+            Com o parâmetro descoberto, o passo final é fuzzing de valores. Geramos uma wordlist de números de 1 a 1000 com bash e testamos cada um como valor do parâmetro <em>id</em>:
+          </p>
+
+          <div class="code-block">
+            <div class="code-block-header">TERMINAL — BASH</div>
+            <code><span class="comment"># Gerar wordlist de IDs numéricos</span>
+<span class="prompt">$ </span><span class="cmd">for</span> i in $(seq 1 1000); do echo $i; done > ids.txt
+
+<span class="comment"># Fuzz com POST e filtrar por tamanho</span>
+<span class="prompt">$ </span><span class="cmd">ffuf</span> <span class="flag">-w</span> <span class="val">ids.txt:FUZZ</span> \
+     <span class="flag">-u</span> <span class="val">http://admin.academy.htb:PORT/admin/admin.php</span> \
+     <span class="flag">-X</span> <span class="val">POST</span> \
+     <span class="flag">-d</span> <span class="string">'id=FUZZ'</span> \
+     <span class="flag">-H</span> <span class="string">'Content-Type: application/x-www-form-urlencoded'</span> \
+     <span class="flag">-fs</span> <span class="val">768</span>
+
+<span class="string">73</span>                      <span class="comment">[Status: 200, Size: 787, Words: 55, Lines: 35]</span>
+
+<span class="comment"># Extrair flag com curl</span>
+<span class="prompt">$ </span><span class="cmd">curl</span> <span class="flag">-s</span> <span class="val">http://admin.academy.htb:PORT/admin/admin.php</span> \
+     <span class="flag">-X POST</span> <span class="flag">-d</span> <span class="string">'id=73'</span>
+
+<span class="val">HTB{p4r4m3t3r_fuzz1ng_1s_k3y!}</span></code>
+          </div>
+
+          <!-- SUMMARY TABLE -->
+          <h2 class="post-heading">// RESUMO DE FLAGS</h2>
+
+          <table class="retro-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>SECÇÃO</th>
+                <th>FLAG / RESPOSTA</th>
+                <th>STATUS</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>01</td>
+                <td>Dir Fuzzing</td>
+                <td><code>/forum</code></td>
+                <td style="color:#00ff41;">&#9632; FOUND</td>
+              </tr>
+              <tr>
+                <td>02</td>
+                <td>Extension Fuzzing</td>
+                <td><code>.php</code></td>
+                <td style="color:#00ff41;">&#9632; FOUND</td>
+              </tr>
+              <tr>
+                <td>03</td>
+                <td>Subdomain Fuzzing</td>
+                <td><code>admin.academy.htb</code></td>
+                <td style="color:#00ff41;">&#9632; FOUND</td>
+              </tr>
+              <tr>
+                <td>04</td>
+                <td>GET Parameter</td>
+                <td><code>?user=key</code></td>
+                <td style="color:#00ff41;">&#9632; FOUND</td>
+              </tr>
+              <tr>
+                <td>05</td>
+                <td>POST Parameter</td>
+                <td><code>id=73</code></td>
+                <td style="color:#00ff41;">&#9632; FOUND</td>
+              </tr>
+              <tr>
+                <td>06</td>
+                <td>Final Flag</td>
+                <td><code>HTB{p4r4m3t3r_fuzz1ng_1s_k3y!}</code></td>
+                <td style="color:#00ff41;">&#9632; CAPTURED</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- TAGS -->
+          <div class="tag-list">
+            <div class="tag">#ffuf</div>
+            <div class="tag">#pentesting</div>
+            <div class="tag">#htb</div>
+            <div class="tag">#web-fuzzing</div>
+            <div class="tag">#enumeration</div>
+            <div class="tag">#bug-bounty</div>
+            <div class="tag">#directory-brute-force</div>
+            <div class="tag">#vhost</div>
+          </div>
+
+        </div>
+
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+
+          <div class="sidebar-block">
+            <div class="sidebar-title">// ÍNDICE</div>
+            <a class="toc-item active" href="#overview">Overview</a>
+            <a class="toc-item" href="#part1">Part 1 — Dir Fuzzing</a>
+            <a class="toc-item sub" href="#hidden-dirs">Hidden Directories</a>
+            <a class="toc-item sub" href="#ext-fuzzing">Extension Fuzzing</a>
+            <a class="toc-item" href="#part2">Part 2 — Subdomains</a>
+            <a class="toc-item sub" href="#vhost">VHost Fuzzing</a>
+            <a class="toc-item" href="#part3">Part 3 — Parameters</a>
+            <a class="toc-item sub" href="#part3">GET Params</a>
+            <a class="toc-item sub" href="#part3">POST Params</a>
+            <a class="toc-item" href="#part4">Part 4 — Value Fuzzing</a>
+          </div>
+
+          <div class="sidebar-block">
+            <div class="sidebar-title">// FLAGS CAPTURADAS</div>
+            <div class="answer-box">
+              <div class="answer-label">DIR OCULTO</div>
+              <div class="answer-value">/forum</div>
+            </div>
+            <div class="answer-box">
+              <div class="answer-label">SUBDOMAIN</div>
+              <div class="answer-value">admin.*</div>
+            </div>
+            <div class="answer-box">
+              <div class="answer-label">FLAG FINAL</div>
+              <div class="answer-value">HTB{****}</div>
+            </div>
+          </div>
+
+          <div class="sidebar-block">
+            <div class="sidebar-title">// PROGRESSO</div>
+            <div class="progress-label">MÓDULO: 100%</div>
+            <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+
+            <div class="progress-label">SECÇÕES: 12/12</div>
+            <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+
+            <div class="progress-label">FLAGS: 8/8</div>
+            <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+
+            <div class="progress-label">SCORE: 3250 PTS</div>
+            <div class="progress-bar"><div class="progress-fill" style="width:85%"></div></div>
+          </div>
+
+          <div class="sidebar-block">
+            <div class="sidebar-title">// PERFIL</div>
+            <div class="sidebar-profile">
+              <div class="profile-avatar">AG</div>
+              <div class="profile-name">AGUIAR857</div>
+              <div class="profile-rank">RANK: HACKER [LVL 6]</div>
+              <div class="social-links">
+                <a href="https://github.com/aguiar857" target="_blank">[GITHUB]</a>
+                <a href="https://www.linkedin.com/in/aguiar857/" target="_blank">[LINKEDIN]</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="sidebar-block" style="border:none;">
+            <div class="sidebar-title">// POSTS RECENTES</div>
+            <a class="toc-item" href="#">[01] Nmap Basics</a>
+            <a class="toc-item" href="#">[02] SQLMap Walkthrough</a>
+            <a class="toc-item" href="#">[03] Burp Suite Intro</a>
+            <a class="toc-item" href="#">[04] FFUF — Este post</a>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- POST NAV -->
+      <div class="post-nav">
+        <a href="#">&lt; POST ANTERIOR</a>
+        <a href="#">PRÓXIMO POST &gt;</a>
+      </div>
+
+      <!-- FOOTER -->
+      <div class="footer-bar">
+        <div>&#9632; AGUIAR857.SYS <span>2026</span></div>
+        <div>POWERED BY <span>JEKYLL v4.4.1</span></div>
+        <div>CYBER SECURITY TERMINAL <span class="blink">&#9632;</span></div>
+      </div>
+
+    </div>
+  </div>
+</body>
+</html>
